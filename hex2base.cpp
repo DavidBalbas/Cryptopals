@@ -191,4 +191,18 @@ int padPKCS7(string *plaintext, int totalLength){
   return 0;
 }
 
+string unpadPKCS7(string plaintext){
+  unsigned char lastChar = (unsigned char) plaintext[plaintext.length() - 1];
+  for(unsigned char i = 1; i <= lastChar; i++){
+    if(((unsigned char) plaintext[plaintext.length() - i]) != lastChar){
+      return "";
+    }
+  }
+  string s;
+  for(int i = 0; i < plaintext.length() - (int) lastChar; i++){
+    s += plaintext[i];
+  }
+  return s;
+}
+
 #endif
