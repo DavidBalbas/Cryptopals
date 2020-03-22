@@ -1,3 +1,5 @@
+#ifndef hex2base_cpp
+#define hex2base_cpp
 #include <iostream>
 #include <string>
 
@@ -179,3 +181,14 @@ int calculateLenBytesBase64(int lenBase){
   // Each 4 base chars require 3 bytes
   return (lenBase + 1) * 3 / 4; // Watch out the padding
 }
+
+int padPKCS7(string *plaintext, int totalLength){
+  if(totalLength < plaintext->length()) return -1;
+  unsigned char padLen = totalLength - plaintext->length();
+  for(int i = 0; i < padLen; i++){
+    *plaintext += (char) padLen;
+  }
+  return 0;
+}
+
+#endif
