@@ -191,6 +191,12 @@ int padPKCS7(string *plaintext, int totalLength){
   return 0;
 }
 
+string autoPadPKCS7(string plaintext){
+  int padLen = 16 - (plaintext.length() % 16);
+  padPKCS7(&plaintext, padLen + plaintext.length());
+  return plaintext;
+}
+
 string unpadPKCS7(string plaintext){
   unsigned char lastChar = (unsigned char) plaintext[plaintext.length() - 1];
   for(unsigned char i = 1; i <= lastChar; i++){

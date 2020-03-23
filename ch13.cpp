@@ -1,6 +1,9 @@
 #include "ecbOracles.cpp"
 
-unsigned char key[16];
+
+
+
+
 
 int main(int argc, char* argv[]) {
   generateKey(key);
