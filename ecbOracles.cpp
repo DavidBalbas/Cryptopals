@@ -33,6 +33,16 @@ int aes_encrypt_ecb(unsigned char* plaintext, unsigned char* key, unsigned char*
   return 0;
 }
 
+int aes_decrypt_ecb(unsigned char* ciphertext, unsigned char* key, unsigned char* plaintext, int length){
+  if(length % 16 != 0){
+    return -1;
+  }
+  for(int i = 0; i < length; i += 16){
+    aes_decrypt(ciphertext + i, key, plaintext + i);
+  }
+  return 0;
+}
+
 string aes_encrypt_random(string preText){
   random_device rd;
   srand(rd());
