@@ -107,10 +107,22 @@ string ecb_oracle_aux(string s1, char c, unsigned char* key){
   return UnsignedCharToString(ciphertext, len);
 }
 
+string ecb_oracle_aux_hard(string unknown, string s1, unsigned char* key){
+  string r = "12345678901234";
+  string in = r + s1 + unknown;
+  in = autoPadPKCS7(in);
+  int len = in.length();
+  unsigned char plaintext[len];
+  unsigned char ciphertext[len];
+  plaintextToBytes(plaintext, in, len);
+  aes_encrypt_ecb(plaintext, key, ciphertext, len);
+  return UnsignedCharToString(ciphertext, len);
+}
+
 string ecb_oracle(string unknown, unsigned char* key){
   int blockSize = 16;
   string s1;
-  while (s1.length() < blockSize -1 ) s1 += 'A';
+  while (s1.length() < blockSize - 1) s1 += 'A';
   string dict[256];
   for(int i = 0; i < 256; i++){
     dict[i] = ecb_oracle_aux(s1, (char) i, key);
@@ -127,6 +139,158 @@ string ecb_oracle(string unknown, unsigned char* key){
     }
   }
   return decrypted;
+}
+
+// string ecb_oracle_hard(string unknown, unsigned char* key){
+//   // step 1: find length of random string.
+//   // to be sure, we should do it twice with another letter(s).
+//   string s1 = "AAAAAAAAAAAAAAA";
+//   string c1;
+//   int pos = 0;
+//   int blockSize = 16;
+//   while(pos == 0 && s1.length() <= 4 * blockSize){
+//     s1 += 'A';
+//     c1 = ecb_oracle_aux_hard(unknown, s1, key);
+//     for(int i = 0; i < c1.length() - blockSize; i += 1){
+//       if(! c1.substr(i, blockSize).compare(c1.substr(i+blockSize, blockSize))) pos = i;
+//     }
+//   }
+//   int rlen = 2 * blockSize + pos - s1.length();
+//   if (pos == 0){
+//     cout << "not detected" << endl;
+//   } else{
+//     cout << "length of random string: " << rlen << endl;
+//   }
+//   // step 2: find length of unknown
+//   int inlen = pos - rlen + blockSize;
+//   int unkBlocks = (c1.length() - inlen - rlen) / blockSize;
+//   unkBlocks = 9;
+//   string foundBlocks[unkBlocks];
+//   string dict[256];
+//   string aux;
+//   string subaux;
+//   string decrypted;
+//   string s2;
+//   // step 3: loop over each block of ciphertext
+//   for(int block = 0; block < unkBlocks; block++){
+//     for(int i = 0; i < blockSize; i++){
+//       s1 = "";
+//       s2 = "";
+//       while (s1.length() < inlen - i - 1) s1 += 'A';
+//       int t = 0;
+//       while (s1.length() + s2.length() < inlen - 1){
+//         s2 += foundBlocks[block][t];
+//         t++;
+//       }
+//       // s1 is crafted
+//       for(int j = 0; j < 256; j++){
+//         dict[j] = ecb_oracle_aux_hard(unknown, s1 + s2 + (char) j , key);
+//       }
+//       aux = ecb_oracle_aux_hard(unknown, s1, key);
+//       for(int j = 0; j < 256; j++){
+//         subaux = aux.substr(inlen + rlen + ((block-1) * blockSize), blockSize);
+//         if(! subaux.compare(dict[j].substr(inlen + rlen + ((block-1) * blockSize), blockSize))){
+//           foundBlocks[block] += (char) j;
+//           break;
+//         }
+//       }
+//     }
+//   }
+//   for(int i = 0; i < unkBlocks; i++){
+//     cout << foundBlocks[i];
+//     decrypted += foundBlocks[i];
+//   }
+//   cout << "decr: " << decrypted << endl;
+//   return decrypted;
+// }
+
+int compareStrings_aux(string s1, string s2, int ini, int blockSize){
+  for(int i = ini; i < s1.length(); i += blockSize){
+    string a = s1.substr(i, blockSize);
+    string b = s2.substr(ini, blockSize);
+    if(! a.compare(b)){
+      return 1;
+    }
+  }
+  return 0;
+}
+
+string ecb_oracle_hard(string unknown, unsigned char* key){
+  // step 1: find length of random string.
+  // to be sure, we should do it twice with another letter(s).
+  string s1 = "AAAAAAAAAAAAAAA";
+  string c1;
+  int pos = 0;
+  int blockSize = 16;
+  while(pos == 0 && s1.length() <= 4 * blockSize){
+    s1 += 'A';
+    c1 = ecb_oracle_aux_hard(unknown, s1, key);
+    for(int i = 0; i < c1.length() - blockSize; i += 1){
+      if(! c1.substr(i, blockSize).compare(c1.substr(i+blockSize, blockSize))) pos = i;
+    }
+  }
+  int rlen = 2 * blockSize + pos - s1.length();
+  if (pos == 0){
+    cout << "not detected" << endl;
+  } else{
+    cout << "length of random string: " << rlen << endl;
+  }
+  // step 2: find length of unknown
+  int inlen = pos - rlen + blockSize;
+  int unklen = (c1.length() - inlen - rlen);
+  string dict[256];
+  string aux;
+  string subaux;
+  string decrypted;
+  string s2;
+  // step 3: loop over each block of ciphertext
+  for(int i = 0; i < blockSize; i++){
+    s1 = "";
+    s2 = "";
+    while (s1.length() < inlen - i - 1) s1 += 'A';
+    int t = 0;
+    while (s1.length() + s2.length() < inlen - 1){
+      s2 += decrypted[t];
+      t++;
+    }
+    // s1 is crafted
+    for(int j = 0; j < 256; j++){
+      dict[j] = ecb_oracle_aux_hard(unknown, s1 + s2 + (char) j , key);
+    }
+    aux = ecb_oracle_aux_hard(unknown, s1, key);
+    for(int j = 0; j < 256; j++){
+      subaux = aux.substr(inlen + rlen - blockSize, blockSize);
+      if(! subaux.compare(dict[j].substr(inlen + rlen - blockSize, blockSize))){
+        decrypted += (char) j;
+        break;
+      }
+    }
+  }
+
+
+  s1 = ""; //this is now fixed
+  while (s1.length() < inlen) s1 += 'A';
+  string s3;
+  int lens3;
+  for(int i = blockSize; i < unklen; i++) {
+    s3 = "";
+    s2 = decrypted.substr(decrypted.length() - blockSize + 1, blockSize - 1); //fine
+    lens3 = ((blockSize - i - 1) % blockSize) + blockSize;
+    //lens3 = 31 - i ;
+    while (s3.length() < lens3) s3 += 'A';
+    for(int j = 0; j < 256; j++){
+      dict[j] = ecb_oracle_aux_hard(unknown, s1 + s2 + (char) j , key);
+    }
+    aux = ecb_oracle_aux_hard(unknown, s1 + s3, key);
+    for(int j = 0; j < 256; j++){
+      if(compareStrings_aux(aux, dict[j], inlen + rlen, blockSize)){
+        decrypted += (char) j;
+        break;
+      }
+    }
+  }
+
+  return unpadPKCS7(decrypted);
 }
 
 #endif
