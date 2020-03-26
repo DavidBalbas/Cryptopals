@@ -14,39 +14,6 @@ char intToHex(int n);
 string encodeHex(unsigned char* bytes, int lenBytes);
 void decodeBase64(unsigned char* bytes, string baseInput);
 
-// int main(int argc, char* argv[]){
-//   cout << intToBase(1) << intToBase(25) << intToBase(-1) << '\n';
-//   string hexInput;
-//   hexInput = "49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d";
-//   cout << "input: " << '\n';
-//   cout << hexInput;
-//   cout << '\n';
-//   int lenBytes = (hexInput.length() + 1) / 2;
-//
-//   unsigned char bytes[lenBytes];
-//   decodeHex(bytes, hexInput);
-//
-//   string baseEnc = encodeBase64(bytes, lenBytes);
-//
-//   for (int j = 0; j < lenBytes; j++){
-//     cout << hex << (int) bytes[j];
-//   }
-//   cout << '\n' << baseEnc;
-//   return 0;
-// }
-
-// int main(int argc, char* argv[]){
-//   string hexInput;
-//   if(argc == 1){
-//     cout << "Input hex string to encode" << '\n';
-//     getline(cin, hexInput);
-//   } else {
-//     hexInput = argv[1];
-//   }
-//   cout << hex2base(hexInput);
-//   return 0;
-// }
-
 string hex2base(string hexInput){
   int lenBytes = (hexInput.length() + 1) / 2;
   unsigned char bytes[lenBytes];
@@ -209,6 +176,26 @@ string unpadPKCS7(string plaintext){
     s += plaintext[i];
   }
   return s;
+}
+
+void fixedXor(unsigned char* in, unsigned char* pad, int len){
+  for (int i = 0; i < len; i++) {
+    in[i] ^= pad[i];
+  }
+}
+
+void singleXor(unsigned char* in, unsigned char* out, unsigned char c, int len){
+  for(int i = 0; i < len; i++){
+    out[i] = c;
+  }
+  fixedXor(out, in, len);
+}
+
+void repeatedXor(unsigned char* in, unsigned char* out, unsigned char* key, int lenIn, int lenKey){
+  for(int i = 0; i < lenIn; i++){
+    out[i] = key[i % lenKey];
+  }
+  fixedXor(out, in, lenIn);
 }
 
 #endif

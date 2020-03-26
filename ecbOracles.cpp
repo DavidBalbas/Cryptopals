@@ -23,26 +23,6 @@ string generateRandomString(int length){
   return str;
 }
 
-int aes_encrypt_ecb(unsigned char* plaintext, unsigned char* key, unsigned char* ciphertext, int length){
-  if(length % 16 != 0){
-    return -1;
-  }
-  for(int i = 0; i < length; i += 16){
-    aes_encrypt(plaintext + i, key, ciphertext + i);
-  }
-  return 0;
-}
-
-int aes_decrypt_ecb(unsigned char* ciphertext, unsigned char* key, unsigned char* plaintext, int length){
-  if(length % 16 != 0){
-    return -1;
-  }
-  for(int i = 0; i < length; i += 16){
-    aes_decrypt(ciphertext + i, key, plaintext + i);
-  }
-  return 0;
-}
-
 string aes_encrypt_random(string preText){
   random_device rd;
   srand(rd());
@@ -140,69 +120,6 @@ string ecb_oracle(string unknown, unsigned char* key){
   }
   return decrypted;
 }
-
-// string ecb_oracle_hard(string unknown, unsigned char* key){
-//   // step 1: find length of random string.
-//   // to be sure, we should do it twice with another letter(s).
-//   string s1 = "AAAAAAAAAAAAAAA";
-//   string c1;
-//   int pos = 0;
-//   int blockSize = 16;
-//   while(pos == 0 && s1.length() <= 4 * blockSize){
-//     s1 += 'A';
-//     c1 = ecb_oracle_aux_hard(unknown, s1, key);
-//     for(int i = 0; i < c1.length() - blockSize; i += 1){
-//       if(! c1.substr(i, blockSize).compare(c1.substr(i+blockSize, blockSize))) pos = i;
-//     }
-//   }
-//   int rlen = 2 * blockSize + pos - s1.length();
-//   if (pos == 0){
-//     cout << "not detected" << endl;
-//   } else{
-//     cout << "length of random string: " << rlen << endl;
-//   }
-//   // step 2: find length of unknown
-//   int inlen = pos - rlen + blockSize;
-//   int unkBlocks = (c1.length() - inlen - rlen) / blockSize;
-//   unkBlocks = 9;
-//   string foundBlocks[unkBlocks];
-//   string dict[256];
-//   string aux;
-//   string subaux;
-//   string decrypted;
-//   string s2;
-//   // step 3: loop over each block of ciphertext
-//   for(int block = 0; block < unkBlocks; block++){
-//     for(int i = 0; i < blockSize; i++){
-//       s1 = "";
-//       s2 = "";
-//       while (s1.length() < inlen - i - 1) s1 += 'A';
-//       int t = 0;
-//       while (s1.length() + s2.length() < inlen - 1){
-//         s2 += foundBlocks[block][t];
-//         t++;
-//       }
-//       // s1 is crafted
-//       for(int j = 0; j < 256; j++){
-//         dict[j] = ecb_oracle_aux_hard(unknown, s1 + s2 + (char) j , key);
-//       }
-//       aux = ecb_oracle_aux_hard(unknown, s1, key);
-//       for(int j = 0; j < 256; j++){
-//         subaux = aux.substr(inlen + rlen + ((block-1) * blockSize), blockSize);
-//         if(! subaux.compare(dict[j].substr(inlen + rlen + ((block-1) * blockSize), blockSize))){
-//           foundBlocks[block] += (char) j;
-//           break;
-//         }
-//       }
-//     }
-//   }
-//   for(int i = 0; i < unkBlocks; i++){
-//     cout << foundBlocks[i];
-//     decrypted += foundBlocks[i];
-//   }
-//   cout << "decr: " << decrypted << endl;
-//   return decrypted;
-// }
 
 int compareStrings_aux(string s1, string s2, int ini, int blockSize){
   for(int i = ini; i < s1.length(); i += blockSize){

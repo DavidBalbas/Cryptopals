@@ -1,5 +1,7 @@
 #include "aes.h"
 
+using namespace std;
+
 void subWord(unsigned char* word){
   for (int i = 0; i < 4; i++) {
     word[i] = sbox[word[i] / 16][word[i] % 16];
@@ -265,53 +267,25 @@ int aes_decrypt_cbc(unsigned char* ciphertext, unsigned char* key, unsigned char
   return 0;
 }
 
-// Adapted for Exercise 7, Set 1
-// int main(int argc, char* argv[]) {
-//   string baseText;
-//   string key;
-//   cout << "Input KEY" << endl;
-//   getline(cin, key);
-//
-//   int lenKey = key.length();
-//   if(lenKey != 16) return -1;
-//
-//   unsigned char k[lenKey];
-//   plaintextToBytes(k, key, lenKey);
-//
-//   if(argc < 2){
-//     cout << "Input TEXT base64" << endl;
-//     getline(cin, baseText);
-//
-//   } else {
-//     int lenBytes = 48;
-//     ifstream inFile(argv[1]);
-//     if(inFile.is_open()) {
-//       char c;
-//       while(inFile.get(c)) {
-//         if(c != '\n'){
-//           baseText += c;
-//         }
-//         if(baseText.length() == 64){
-//           unsigned char in[lenBytes];
-//           unsigned char out[lenBytes];
-//           decodeBase64(in, baseText, lenBytes);
-//
-//           aes_decrypt(in, k, out);
-//           aes_decrypt(in + 16, k, out + 16);
-//           aes_decrypt(in + 32, k, out + 32);
-//
-//           cout << UnsignedCharToString(out, lenBytes);
-//
-//           baseText = "";
-//         }
-//       }
-//       inFile.close();
-//     }
-//     // GETTING BASE TEXT AS ARGV 2
-//   }
-//
-//   return 0;
-// }
+int aes_encrypt_ecb(unsigned char* plaintext, unsigned char* key, unsigned char* ciphertext, int length){
+  if(length % 16 != 0){
+    return -1;
+  }
+  for(int i = 0; i < length; i += 16){
+    aes_encrypt(plaintext + i, key, ciphertext + i);
+  }
+  return 0;
+}
+
+int aes_decrypt_ecb(unsigned char* ciphertext, unsigned char* key, unsigned char* plaintext, int length){
+  if(length % 16 != 0){
+    return -1;
+  }
+  for(int i = 0; i < length; i += 16){
+    aes_decrypt(ciphertext + i, key, plaintext + i);
+  }
+  return 0;
+}
 
 // int main(int argc, char* argv[]) {
 //
