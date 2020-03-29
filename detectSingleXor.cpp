@@ -41,3 +41,49 @@ char findFixedXorChar(unsigned char* bytes, int len){
   }
   return (char) first;
 }
+
+// Brian Kerningham's Algorithm
+int countOnesInByte(unsigned char n) {
+  int i = 0;
+  while(n){
+    n &= (n - 1);
+    i++;
+  }
+  return i;
+}
+
+int hammingDistance(unsigned char* b1, int l1, unsigned char* b2, int l2){
+  int distance = 0;
+  unsigned char ** blong;
+  if(l1 > l2){
+    blong = &b1;
+  } else{
+    blong = &b2;
+  }
+  for(int i = 0; i < max(l1, l2); i++){
+    if(i < min(l1, l2)){
+      distance += countOnesInByte(b1[i] ^ b2[i]);
+    } else {
+      distance += countOnesInByte(*blong[i]);
+    }
+  }
+  return distance;
+}
+
+int findKeySize(unsigned char* ciphertext, int maxSize, int len){
+  float distances[maxSize - 1];
+  int minSize = 2;
+  for(int size = 2; size <= maxSize; size++){
+    int numPieces = len / size - 1;
+    distances[size - 2] = 0;
+    for(int j = 0; j < numPieces; j++) {
+      distances[size - 2] += hammingDistance(ciphertext, size, ciphertext + size * j, size);
+    }
+    distances[size - 2] = distances[size - 2] / (size * numPieces);
+    cout << size << '\t' << distances[size - 2] << endl;
+    if(distances[size - 2] < distances[minSize - 2]){
+      minSize = size;
+    }
+  }
+  return minSize;
+}

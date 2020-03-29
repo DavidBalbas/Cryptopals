@@ -12,7 +12,7 @@ char intToBase(int n);
 string hex2base(string hexInput);
 char intToHex(int n);
 string encodeHex(unsigned char* bytes, int lenBytes);
-void decodeBase64(unsigned char* bytes, string baseInput);
+void decodeBase64(unsigned char* bytes, string baseInput, int lenBytes);
 
 string hex2base(string hexInput){
   int lenBytes = (hexInput.length() + 1) / 2;
@@ -147,6 +147,13 @@ void decodeBase64(unsigned char* bytes, string baseInput, int lenBytes){
 int calculateLenBytesBase64(int lenBase){
   // Each 4 base chars require 3 bytes
   return (lenBase + 1) * 3 / 4; // Watch out the padding
+}
+
+string baseToString(string baseText){
+  int len = calculateLenBytesBase64(baseText.length());
+  unsigned char bytes[len];
+  decodeBase64(bytes, baseText, len);
+  return UnsignedCharToString(bytes, len);
 }
 
 int padPKCS7(string *plaintext, int totalLength){
