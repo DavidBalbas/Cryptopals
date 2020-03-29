@@ -1,5 +1,5 @@
-#include "cbcAttacks.cpp"
 #include <algorithm>
+#include "ecbOracles.cpp"
 
 
 string appendStrings_aux(string in, unsigned char* key, unsigned char* iv){
@@ -39,13 +39,15 @@ int searchForAdmin(string in, unsigned char* key, unsigned char* iv){
 
 int injectBitflipping(unsigned char* key, unsigned char* iv){
   int lenBlock = 16;
-  //pre is exactly two blocks.
+  //pre is exactly two blocks long. Otherwise we would pad
   string b1 = "1234567890123456";
-  string b2 = ":admin<true:0000"; //< is = + 1
+  string b2 = "0admin0true00000"; //< is = + 1
   string ciphertext = appendStrings_aux(b1+b2, key, iv);
-  ciphertext[32] += 1;
-  ciphertext[38] += 1;
-  ciphertext[43] += 1;
+  //xor character in b2 with the aimed character. The error propagates
+  ciphertext[32] ^= ('0' ^ ';');
+  ciphertext[38] ^= ('0' ^ '=');
+  ciphertext[43] ^= ('0' ^ ';');
+
   return searchForAdmin(ciphertext, key, iv);
 }
 
