@@ -103,7 +103,6 @@ void invShiftRows(unsigned char state[][4]) {
   state[1][1] = temp;
 }
 
-
 unsigned char mult(unsigned char n, unsigned char m){
   if (n == 0x02) {
     return mul2[m];
